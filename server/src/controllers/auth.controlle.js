@@ -50,6 +50,23 @@ export async function register(req, res){
     })
 
 
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true
+    })
+
+    re.status(201).json({
+        message:"User Registered Successfully",
+        data:{
+            users: {
+                email: user.email,
+                name: user.name,
+                id: user._id
+            },
+            accessToken
+        }
+    })
+
+
 
 
 
