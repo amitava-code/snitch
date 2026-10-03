@@ -54,7 +54,11 @@ export async function register(req, res){
         httpOnly: true
     })
 
-    re.status(201).json({
+    await userModel.findByIdAndUpdate(user._id,{
+        refreshToken
+    })
+
+    res.status(201).json({
         message:"User Registered Successfully",
         data:{
             users: {
