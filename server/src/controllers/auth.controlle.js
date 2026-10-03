@@ -177,7 +177,7 @@ export async function refresh(req, res){
             refreshToken: newRefreshToken
         })
 
-        res.cookie("refreshToken", refreshToken,{
+        res.cookie("refreshToken", newRefreshToken,{
             httpOnly: true
         })
 
