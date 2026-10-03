@@ -1,6 +1,6 @@
 import userModel from '../models/user.model.js'
 import bcrypt from 'bcryptjs'
-import { createAccessToken, createRefreshToken } from '../utils/auth.utils.js'
+import { createAccessToken, createRefreshToken, readRefreshToken } from '../utils/auth.utils.js'
 
 /**
  * @description register an user and save the data from req.body
@@ -132,6 +132,70 @@ export async function login(req, res){
             accessToken
         }
     })
+
+
+
+}
+
+export async function refresh(req, res){
+
+    const refreshToken = req.cookies.refreshToken
+
+    if(!refreshToken){
+        return res.status(400).json({
+            message:"Refresh token is required"
+        })
+    }
+
+    try{
+
+        const decoded = readRefreshToken(refreshToken)
+
+        const { userId, role} = decoded
+
+        const user = await userModel.findById(userId)
+
+        if (refreshToken != user.refreshToken){
+            await userModel.findByIdAndUpdate(user._id,{
+                refreshToken: null
+            })
+
+            return res.status(401).json({
+                message:"Refresh token mismatch"
+            })
+        }
+
+        const accessToken = createAccessToken({
+            userId, role
+        })
+
+        const newRefreshToken = createRefreshToken({
+            userId, role
+        })
+
+        await userModel.findByIdAndUpdate(user._id,{
+            refreshToken: newRefreshToken
+        })
+
+        res.cookie("refreshToken", refreshToken,{
+            httpOnly: true
+        })
+
+        res.status(200).json({
+            message:"Token rotated successfully",
+            data:{
+                user:{
+                    email:user.email,
+                    name: user.name,
+                    id: user._id
+                },
+                accessToken
+            }
+        })
+
+    }catch(err){
+        console.log(err)
+    }
 
 
 
