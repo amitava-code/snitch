@@ -200,3 +200,21 @@ export async function refresh(req, res){
 
 
 }
+
+export async function getMe(req, res) {
+    
+    const {userId} = req.user
+
+    const user = await userModel.findById(userId)
+
+    res.status(200).json({
+        message: "user data fetch successfully",
+        data:{
+            user:{
+                email:user.email,
+                name:user.name,
+                id:user._id
+            }
+        }
+    })
+}
